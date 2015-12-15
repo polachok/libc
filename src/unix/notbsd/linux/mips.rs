@@ -310,5 +310,5 @@ extern {
                        hostlen: ::socklen_t,
                        serv: *mut ::c_char,
                        sevlen: ::socklen_t,
-                       flags: ::c_uint) -> ::c_int;
+                       flags: ::c_int) -> ::c_int;
 }
