@@ -2,8 +2,6 @@ language: rust
 sudo: required
 dist: trusty
 rust:
-  - 1.0.0
-  - beta
   - nightly
 services:
   - docker
@@ -19,7 +17,6 @@ os:
 env:
   matrix:
     - ARCH=x86_64
-    - ARCH=i686
   global:
     secure: eIDEoQdTyglcsTD13zSGotAX2HDhRSXIaaTnVZTThqLSrySOc3/6KY3qmOc2Msf7XaBqfFy9QA+alk7OwfePp253eiy1Kced67ffjjFOytEcRT7FlQiYpcYQD6WNHZEj62/bJBO4LTM9sGtWNCTJVEDKW0WM8mUK7qNuC+honPM=
 matrix:
