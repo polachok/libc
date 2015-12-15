@@ -95,7 +95,7 @@ case "$TARGET" in
     install emdebian-archive-keyring
     install qemu-user
     wget http://codescape-mips-sdk.imgtec.com/components/toolchain/2015.06-05/Codescape.GNU.Tools.Package.2015.06-05.for.MIPS.IMG.Linux.CentOS-5.x86_64.tar.gz
-    tar xvzf  Codescape.GNU.Tools.Package.2015.06-05.for.MIPS.IMG.Linux.CentOS-5.x86_64.tar.gz -C /
+    sudo tar xvzf  Codescape.GNU.Tools.Package.2015.06-05.for.MIPS.IMG.Linux.CentOS-5.x86_64.tar.gz -C /
     export PATH=$PATH:/mips-img-linux-gnu/2015.06-05/bin/
     export CC=mips-img-linux-gnu-gcc
     ;;
