@@ -30,7 +30,7 @@ if [ "$OS" = "Linux" ]; then
     run x86_64-unknown-linux-gnu clang
     run i686-unknown-linux-gnu clang
     run x86_64-unknown-linux-musl musl-gcc
-    run mips-unknown-linux-gnu mips-linux-gnu-gcc
+    run mips-unknown-linux-gnu mips-img-linux-gnu-gcc
     run aarch64-unknown-linux-gnu aarch64-linux-gnueabihf-gcc
     run arm-unknown-linux-gnueabihf arm-linux-gnueabihf-gcc-4.7
 

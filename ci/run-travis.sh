@@ -72,7 +72,7 @@ case "$TARGET" in
     ;;
 
   arm-unknown-linux-gnueabihf)
-    install gcc-4.7-arm-linux-gnueabihf qemu-user
+    install gcc-4.7-arm-linux-gnueabihf qemu-user -y --force-yes
     export CC=arm-linux-gnueabihf-gcc-4.7
     ;;
 
@@ -93,8 +93,12 @@ case "$TARGET" in
     echo 'deb http://www.emdebian.org/debian/ squeeze main' | \
       sudo tee -a /etc/apt/sources.list
     install emdebian-archive-keyring
-    install qemu-user gcc-4.4-mips-linux-gnu -y --force-yes
-    export CC=mips-linux-gnu-gcc
+    install qemu-user
+    wget http://codescape-mips-sdk.imgtec.com/components/toolchain/2015.06-05/Codescape.GNU.Tools.Package.2015.06-05.for.MIPS.IMG.Linux.CentOS-5.x86_64.tar.gz
+    sudo tar xzf  Codescape.GNU.Tools.Package.2015.06-05.for.MIPS.IMG.Linux.CentOS-5.x86_64.tar.gz -C /
+    export PATH=$PATH:/mips-img-linux-gnu/2015.06-05/bin/
+    export CC=mips-img-linux-gnu-gcc
+    export LD=mips-img-linux-gnu-gcc
     ;;
 
   *)
