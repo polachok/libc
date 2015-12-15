@@ -98,6 +98,7 @@ case "$TARGET" in
     sudo tar xzf  Codescape.GNU.Tools.Package.2015.06-05.for.MIPS.IMG.Linux.CentOS-5.x86_64.tar.gz -C /
     export PATH=$PATH:/mips-img-linux-gnu/2015.06-05/bin/
     export CC=mips-img-linux-gnu-gcc
+    export LD=mips-img-linux-gnu-gcc
     ;;
 
   *)
