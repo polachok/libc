@@ -21,7 +21,7 @@ env:
 matrix:
   include:
     - os: linux
-      env: TARGET=mips-unknown-linux-gnu
+      env: TARGET=mips-unknown-linux-gnu DOCKER=plhk/ubuntu-cross-mips:latest CC=mips-linux-gnu-gcc
       rust: nightly
 notifications:
   email:

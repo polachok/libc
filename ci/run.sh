@@ -13,7 +13,7 @@ case "$TARGET" in
     ;;
 
   *)
-    cargo build --manifest-path libc-test/Cargo.toml --target $TARGET
+    cargo build --manifest-path libc-test/Cargo.toml --target $TARGET --verbose
     ;;
 esac
 

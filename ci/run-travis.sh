@@ -60,6 +60,7 @@ if [ "$DOCKER" != "" ]; then
     -v `pwd`:/checkout \
     -e LD_LIBRARY_PATH=/usr/local/lib \
     -e CARGO_TARGET_DIR=/tmp \
+    -e CC=mips-linux-gnu-gcc-5 \
     -w /checkout \
     -it $DOCKER \
     ci/run.sh $TARGET
