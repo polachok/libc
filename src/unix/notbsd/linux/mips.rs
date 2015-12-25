@@ -63,7 +63,7 @@ s! {
     }
 
     pub struct sigaction {
-        pub sa_flags: ::c_uint,
+        pub sa_flags: ::c_int,
         pub sa_sigaction: ::sighandler_t,
         pub sa_mask: sigset_t,
         _restorer: *mut ::c_void,
@@ -310,5 +310,5 @@ extern {
                        hostlen: ::socklen_t,
                        serv: *mut ::c_char,
                        sevlen: ::socklen_t,
-                       flags: ::c_uint) -> ::c_int;
+                       flags: ::c_int) -> ::c_int;
 }

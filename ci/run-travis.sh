@@ -60,6 +60,7 @@ if [ "$DOCKER" != "" ]; then
     -v `pwd`:/checkout \
     -e LD_LIBRARY_PATH=/usr/local/lib \
     -e CARGO_TARGET_DIR=/tmp \
+    -e CC=mips-linux-gnu-gcc-5 \
     -w /checkout \
     -it $DOCKER \
     ci/run.sh $TARGET
@@ -88,13 +89,12 @@ case "$TARGET" in
     # Download pre-built and custom MIPS libs and then also instsall the MIPS
     # compiler according to this post:
     # http://sathisharada.blogspot.com/2014_10_01_archive.html
-    echo 'deb http://ftp.de.debian.org/debian squeeze main' | \
-      sudo tee -a /etc/apt/sources.list
-    echo 'deb http://www.emdebian.org/debian/ squeeze main' | \
-      sudo tee -a /etc/apt/sources.list
-    install emdebian-archive-keyring
-    install qemu-user gcc-4.4-mips-linux-gnu -y --force-yes
-    export CC=mips-linux-gnu-gcc
+    sudo add-apt-repository -y ppa:angelsl/mips-cross
+    sudo apt-get update
+    apt-get install -y --force-yes --no-install-recommends \
+        gcc-5-mips-linux-gnu libc6-dev-mips-cross \
+        gcc-5-mipsel-linux-gnu libc6-dev-mipsel-cross
+    export CC=mips-linux-gnu-gcc-5
     ;;
 
   *)

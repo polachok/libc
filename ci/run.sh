@@ -5,6 +5,8 @@
 
 set -ex
 
+apt-get install -y qemu-user
+
 TARGET=$1
 case "$TARGET" in
   *-apple-ios)
@@ -13,7 +15,7 @@ case "$TARGET" in
     ;;
 
   *)
-    cargo build --manifest-path libc-test/Cargo.toml --target $TARGET
+    cargo build --manifest-path libc-test/Cargo.toml --target $TARGET --verbose
     ;;
 esac
 
@@ -31,7 +33,8 @@ case "$TARGET" in
     ;;
 
   mips-unknown-linux-gnu)
-    qemu-mips -L /usr/mips-linux-gnu libc-test/target/$TARGET/debug/libc-test
+    #qemu-mips -L /usr/mips-linux-gnu libc-test/target/$TARGET/debug/libc-test
+    qemu-mips -L /usr/mips-linux-gnu /tmp/$TARGET/debug/libc-test
     ;;
 
   aarch64-unknown-linux-gnu)
