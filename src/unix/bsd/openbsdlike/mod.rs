@@ -6,6 +6,8 @@ pub type nlink_t = ::uint32_t;
 pub type ino_t = ::uint64_t;
 pub type pthread_key_t = ::c_int;
 pub type rlim_t = u64;
+pub type speed_t = ::c_uint;
+pub type tcflag_t = ::c_uint;
 
 pub enum timezone {}
 
@@ -35,6 +37,16 @@ s! {
         pub sin_port: ::in_port_t,
         pub sin_addr: ::in_addr,
         pub sin_zero: [::int8_t; 8],
+    }
+
+    pub struct termios {
+        pub c_iflag: ::tcflag_t,
+        pub c_oflag: ::tcflag_t,
+        pub c_cflag: ::tcflag_t,
+        pub c_lflag: ::tcflag_t,
+        pub c_cc: [::cc_t; ::NCCS],
+        pub c_ispeed: ::c_int,
+        pub c_ospeed: ::c_int,
     }
 }
 
@@ -214,11 +226,6 @@ pub const F_GETFD : ::c_int = 1;
 pub const F_SETFD : ::c_int = 2;
 pub const F_GETFL : ::c_int = 3;
 pub const F_SETFL : ::c_int = 4;
-pub const F_GETOWN : ::c_int = 5;
-pub const F_SETOWN : ::c_int = 6;
-pub const F_GETLK : ::c_int = 7;
-pub const F_SETLK : ::c_int = 8;
-pub const F_SETLKW : ::c_int = 9;
 
 pub const SIGTRAP : ::c_int = 5;
 
@@ -324,8 +331,6 @@ pub const CTL_KERN : ::c_int = 1;
 
 pub const IPPROTO_RAW : ::c_int = 255;
 
-pub const PATH_MAX: ::c_int = 1024;
-
 pub const _SC_ARG_MAX : ::c_int = 1;
 pub const _SC_CHILD_MAX : ::c_int = 2;
 pub const _SC_NGROUPS_MAX : ::c_int = 4;
@@ -360,6 +365,7 @@ pub const KERN_PROC_ARGV: ::c_int = 1;
 extern {
     pub fn mincore(addr: *mut ::c_void, len: ::size_t,
                    vec: *mut ::c_char) -> ::c_int;
+    #[cfg_attr(target_os = "netbsd", link_name = "__clock_gettime50")]
     pub fn clock_gettime(clk_id: ::c_int, tp: *mut ::timespec) -> ::c_int;
     pub fn __errno() -> *mut ::c_int;
     pub fn backtrace(buf: *mut *mut ::c_void, sz: ::size_t) -> ::size_t;
@@ -369,6 +375,7 @@ extern {
     pub fn pthread_set_name_np(tid: ::pthread_t, name: *const ::c_char);
     pub fn pthread_stackseg_np(thread: ::pthread_t,
                                sinfo: *mut ::stack_t) -> ::c_uint;
+    pub fn memrchr(cx: *const ::c_void, c: ::c_int, n: ::size_t) -> *mut ::c_void;
 }
 
 cfg_if! {

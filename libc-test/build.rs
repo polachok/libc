@@ -6,6 +6,7 @@ use std::env;
 
 fn main() {
     let target = env::var("TARGET").unwrap();
+    let x86_64 = target.contains("x86_64");
     let windows = target.contains("windows");
     let mingw = target.contains("windows-gnu");
     let linux = target.contains("unknown-linux");
@@ -20,7 +21,7 @@ fn main() {
     let mut cfg = ctest::TestGenerator::new();
 
     // Pull in extra goodies on linux/mingw
-    if target.contains("unknown-linux") {
+    if linux || android {
         cfg.define("_GNU_SOURCE", None);
     } else if windows {
         cfg.define("_WIN32_WINNT", Some("0x8000"));
@@ -81,6 +82,12 @@ fn main() {
         cfg.header("utime.h");
         cfg.header("pwd.h");
         cfg.header("grp.h");
+        cfg.header("sys/utsname.h");
+        cfg.header("sys/ptrace.h");
+        cfg.header("sys/mount.h");
+        cfg.header("sys/uio.h");
+        cfg.header("sched.h");
+        cfg.header("termios.h");
     }
 
     if android {
@@ -89,6 +96,7 @@ fn main() {
     } else if !windows {
         cfg.header("glob.h");
         cfg.header("ifaddrs.h");
+        cfg.header("sys/quota.h");
         cfg.header("sys/statvfs.h");
 
         if !musl {
@@ -109,27 +117,48 @@ fn main() {
         }
     }
 
+    if bsdlike {
+        cfg.header("sys/event.h");
+    }
+
     if linux {
+        cfg.header("mqueue.h");
+        cfg.header("sys/signalfd.h");
         cfg.header("sys/xattr.h");
         cfg.header("sys/ipc.h");
         cfg.header("sys/shm.h");
     }
 
     if linux || android {
-        cfg.header("netpacket/packet.h");
-        cfg.header("net/ethernet.h");
         cfg.header("malloc.h");
+        cfg.header("net/ethernet.h");
+        cfg.header("netpacket/packet.h");
+        cfg.header("sched.h");
+        cfg.header("sys/epoll.h");
+        cfg.header("sys/eventfd.h");
         cfg.header("sys/prctl.h");
-        /* linux kernel header */
+        cfg.header("sys/vfs.h");
+        cfg.header("sys/syscall.h");
         if !musl {
             cfg.header("linux/netlink.h");
+            cfg.header("linux/magic.h");
+            cfg.header("linux/fs.h");
+
+            if !mips {
+                cfg.header("linux/quota.h");
+            }
         }
-        cfg.header("sched.h");
     }
 
     if freebsd {
         cfg.header("pthread_np.h");
         cfg.header("sched.h");
+    }
+
+    if netbsd {
+        cfg.header("ufs/ufs/quota.h");
+        cfg.header("ufs/ufs/quota1.h");
+        cfg.header("sys/ioctl_compat.h");
     }
 
     cfg.type_name(move |ty, is_struct| {
@@ -182,6 +211,7 @@ fn main() {
                     s.replace("e_nsec", ".tv_nsec")
                 }
             }
+            "u64" if struct_ == "epoll_event" => "data.u64".to_string(),
             s => s.to_string(),
         }
     });
@@ -198,6 +228,10 @@ fn main() {
     cfg.skip_struct(move |ty| {
         match ty {
             "sockaddr_nl" => musl,
+
+            // The alignment of this is 4 on 64-bit OSX...
+            "kevent" if apple && x86_64 => true,
+
             _ => false
         }
     });
@@ -239,6 +273,19 @@ fn main() {
             // work around super old mips toolchain
             "SCHED_IDLE" | "SHM_NORESERVE" => mips,
 
+            // weird signed extension or something like that?
+            "MS_NOUSER" => true,
+
+            // These OSX constants are flagged as deprecated
+            "NOTE_EXIT_REPARENTED" |
+            "NOTE_REAP" if apple => true,
+
+            // The linux/quota.h header file which defines these can't be
+            // included with sys/quota.h currently on MIPS, so we don't include
+            // it and just ignore these constants
+            "QFMT_VFS_OLD" |
+            "QFMT_VFS_V0" if mips && linux => true,
+
             _ => false,
         }
     });
@@ -258,12 +305,19 @@ fn main() {
             // typed 2nd arg on linux and android
             "gettimeofday" if linux || android || freebsd => true,
 
+            // not declared in newer android toolchains
+            "getdtablesize" if android => true,
+
             "dlerror" if android => true, // const-ness is added
             "dladdr" if musl => true, // const-ness only added recently
 
             // OSX has 'struct tm *const' which we can't actually represent in
             // Rust, but is close enough to *mut
             "timegm" if apple => true,
+
+            // OSX's daemon is deprecated in 10.5 so we'll get a warning (which
+            // we turn into an error) so just ignore it.
+            "daemon" if apple => true,
 
             // These functions presumably exist on netbsd but don't look like
             // they're implemented on rumprun yet, just let them slide for now.
@@ -275,14 +329,28 @@ fn main() {
             "pthread_stackseg_np" |
             "shm_open" |
             "shm_unlink" |
+            "syscall" |
+            "ptrace" |
             "sigaltstack" if rumprun => true,
 
             _ => false,
         }
     });
 
-    // Windows dllimport oddness?
-    cfg.skip_fn_ptrcheck(move |_| windows);
+    cfg.skip_fn_ptrcheck(move |name| {
+        match name {
+            // This used to be called bsd_signal in rev 18 of the android
+            // platform and is now just called signal, the old `bsd_signal`
+            // symbol, however, still remains, just gives a different function
+            // pointer.
+            "signal" if android => true,
+
+            // dllimport weirdness?
+            _ if windows => true,
+
+            _ => false,
+        }
+    });
 
     cfg.skip_field_type(move |struct_, field| {
         // This is a weird union, don't check the type.
@@ -300,7 +368,7 @@ fn main() {
     });
 
     cfg.fn_cname(move |name, cname| {
-        if windows || android {
+        if windows {
             cname.unwrap_or(name).to_string()
         } else {
             name.to_string()
