@@ -5,6 +5,8 @@
 
 set -ex
 
+apt-get install -y qemu-user
+
 TARGET=$1
 case "$TARGET" in
   *-apple-ios)
